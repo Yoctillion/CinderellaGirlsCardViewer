@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CinderellaGirlsCardViewer.Models;
+using CsQuery.ExtensionMethods.Internal;
 
 namespace CinderellaGirlsCardViewer.ViewModels
 {
@@ -12,20 +14,7 @@ namespace CinderellaGirlsCardViewer.ViewModels
 
         #region Characters
 
-        private Character[] _characters;
-
-        public Character[] Characters
-        {
-            get { return this._characters; }
-            private set
-            {
-                if (this._characters != value)
-                {
-                    this._characters = value;
-                    this.OnPropertyChanged();
-                }
-            }
-        }
+        public ObservableCollection<Character> Characters { get; } = new ObservableCollection<Character>();
 
         #endregion
 
@@ -118,13 +107,22 @@ namespace CinderellaGirlsCardViewer.ViewModels
         public async Task QueryCharacter(string queryString)
         {
             this.IsQuerying = true;
+
             this.SelectedCharacter = null;
+            this.Characters.Clear();
             this._cardsMap.Clear();
-            this.Characters = (await this._client.Query(queryString)).ToArray();
-            if (Characters.Length == 1)
+
+            var pages = this._client.Query(queryString);
+            while (await pages.LoadNextPage())
+            {
+                this.Characters.AddRange(pages.Characters);
+            }
+
+            if (Characters.Count == 1)
             {
                 this.SelectedCharacter = this.Characters[0];
             }
+
             this.IsQuerying = false;
         }
 

@@ -82,6 +82,7 @@
     <Compile Include="Converters\InvertBooleanConverter.cs" />
     <Compile Include="EnumEx.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Models\CharacterPageLoader.cs" />
     <Compile Include="ViewModels\GalleryViewModel.cs" />
     <Compile Include="Views\GalleryView.xaml.cs">
       <DependentUpon>GalleryView.xaml</DependentUpon>

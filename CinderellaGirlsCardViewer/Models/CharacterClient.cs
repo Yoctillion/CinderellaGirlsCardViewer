@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CsQuery;
+using CsQuery.ExtensionMethods.Internal;
 
 namespace CinderellaGirlsCardViewer.Models
 {
@@ -38,28 +40,9 @@ namespace CinderellaGirlsCardViewer.Models
         }
 
 
-        public async Task<IEnumerable<Character>> Query(string keyword)
+        public CharacterPageLoader Query(string keyword)
         {
-            const string queryUrl = "http://sp.pf.mbga.jp/12008305/?guid=ON&url=http%3A%2F%2F125.6.169.35%2Fidolmaster%2Fgallery";
-
-            using (var queryResult = await this._client.PostAsync(queryUrl, ToContent(keyword)))
-            {
-                var str = await queryResult.Content.ReadAsStringAsync();
-                CQ dom = str;
-
-                var idols = dom.GetCharacters();
-
-                string nextPageUrl;
-                while ((nextPageUrl = dom.GetNextPageUrl()) != null)
-                {
-                    Debug.WriteLine("Query " + nextPageUrl);
-
-                    dom = await this._client.GetStringAsync(nextPageUrl);
-                    idols = idols.Concat(dom.GetCharacters());
-                }
-
-                return idols;
-            }
+            return new CharacterPageLoader(this._client, keyword);
         }
 
         public async Task<IEnumerable<Card>> GetCardsOfCharacter(Character character)
@@ -80,11 +63,6 @@ namespace CinderellaGirlsCardViewer.Models
         {
             this._client.Dispose();
             this._handler.Dispose();
-        }
-
-        private static FormUrlEncodedContent ToContent(string keyword)
-        {
-            return new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("keyword", keyword) });
         }
     }
 }
