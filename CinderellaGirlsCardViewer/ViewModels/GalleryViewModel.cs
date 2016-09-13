@@ -95,13 +95,13 @@ namespace CinderellaGirlsCardViewer.ViewModels
 
         #endregion
 
-        private readonly Dictionary<Character, Card[]> _cardsMap;
+        private readonly SimpleCache<Character, Card[]> _cardsCache;
 
         public GalleryViewModel()
         {
             this._client = new CharacterClient();
             this._client.LoadCookie();
-            this._cardsMap = new Dictionary<Character, Card[]>();
+            this._cardsCache = new SimpleCache<Character, Card[]>();
         }
 
         public async Task QueryCharacter(string queryString)
@@ -110,7 +110,7 @@ namespace CinderellaGirlsCardViewer.ViewModels
 
             this.SelectedCharacter = null;
             this.Characters.Clear();
-            this._cardsMap.Clear();
+            this._cardsCache.Clear();
 
             var pages = this._client.Query(queryString);
             while (await pages.LoadNextPage())
@@ -126,37 +126,17 @@ namespace CinderellaGirlsCardViewer.ViewModels
             this.IsQuerying = false;
         }
 
-
-        private readonly object _getCardsLock = new object();
-        private Task<Card[]> _currentTask;
+        private readonly SimpleTaskManager _getCardsTaskManager = new SimpleTaskManager();
 
         public void GetCards(Character character)
         {
-            lock (this._getCardsLock)
+            this._getCardsTaskManager.Do(new SpecialTask<Card[]>
             {
-                this._currentTask = Task.Run(() =>
-                {
-                    if (character == null) return null;
-
-                    Card[] cards;
-                    if (!this._cardsMap.TryGetValue(character, out cards))
-                    {
-                        cards = this._client.GetCardsOfCharacter(character).Result.ToArray();
-                        this._cardsMap[character] = cards;
-                    }
-
-                    return cards;
-                });
-
-                this._currentTask.ContinueWith(t =>
-                {
-                    if (this._currentTask == t)
-                    {
-                        this.Cards = t.Result;
-                        this._currentTask = null;
-                    }
-                });
-            }
+                BeforeCancelling = () => character != null
+                    ? this._cardsCache.Get(character, c => this._client.GetCardsOfCharacter(c).Result.ToArray())
+                    : null,
+                IfNotCancelled = cards => this.Cards = cards
+            });
         }
 
         public async Task SaveImage(Uri url, string path)
