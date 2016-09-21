@@ -132,9 +132,13 @@ namespace CinderellaGirlsCardViewer.ViewModels
         {
             this._getCardsTaskManager.Do(new SpecialTask<Card[]>
             {
-                BeforeCancelling = () => character != null
-                    ? this._cardsCache.Get(character, c => this._client.GetCardsOfCharacter(c).Result.ToArray())
-                    : null,
+                BeforeCancelling = () =>
+                {
+                    this.Cards = null;
+                    return character != null
+                        ? this._cardsCache.Get(character, c => this._client.GetCardsOfCharacter(c).Result.ToArray())
+                        : null;
+                },
                 IfNotCancelled = cards => this.Cards = cards
             });
         }
