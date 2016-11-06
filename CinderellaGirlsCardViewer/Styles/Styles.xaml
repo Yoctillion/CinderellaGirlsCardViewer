@@ -73,6 +73,35 @@
                 </ItemsPanelTemplate>
             </Setter.Value>
         </Setter>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <TranslateTransform Y="100" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <EventTrigger.Actions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="0"
+                                                         To="1"
+                                                         Duration="0:0:1" />
+                                        <DoubleAnimation DecelerationRatio="1"
+                                                         Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                                         To="0"
+                                                         Duration="0:0:.5" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger.Actions>
+                        </EventTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="StrechSizeImageStyleKey"
@@ -88,5 +117,15 @@
                     Value="None" />
         <Setter Property="RenderOptions.BitmapScalingMode"
                     Value="HighQuality" />
+    </Style>
+    
+    <Style TargetType="TextBox">
+        <Setter Property="VerticalContentAlignment"
+                Value="Center" />
+    </Style>
+
+    <Style TargetType="PasswordBox">
+        <Setter Property="VerticalContentAlignment"
+                Value="Center" />
     </Style>
 </ResourceDictionary>

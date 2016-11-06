@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32;
@@ -64,6 +67,17 @@ namespace CinderellaGirlsCardViewer
         public static void ChangeBrowserUserAgent(string userAgent)
         {
             UrlMkSetSessionOption(UrlmonOptionUseragent, userAgent, userAgent.Length, 0);
+        }
+
+        public static DateTime GetLastModifedTime(this HttpResponseMessage response)
+        {
+            const string format = "ddd, dd MMM yyyy HH:mm:ss 'GMT'";
+
+            IEnumerable<string> lastModified;
+
+            return response.Headers.TryGetValues("last-modified", out lastModified)
+                ? DateTime.ParseExact(lastModified.First(), format, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
+                : DateTime.Now;
         }
     }
 }

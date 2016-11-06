@@ -55,8 +55,14 @@ namespace CinderellaGirlsCardViewer.Models
 
         public async Task Download(Uri url, string path)
         {
-            var content = await this._client.GetByteArrayAsync(url);
-            File.WriteAllBytes(path, content);
+            using (var response = await this._client.GetAsync(url))
+            {
+                var content = await response.Content.ReadAsByteArrayAsync();
+                File.WriteAllBytes(path, content);
+
+                var time = response.GetLastModifedTime();
+                File.SetLastWriteTime(path, time);
+            }
         }
 
         public void Dispose()
