@@ -1,5 +1,8 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using CinderellaGirlsCardViewer.Models;
 using CinderellaGirlsCardViewer.ViewModels;
 using Microsoft.Win32;
@@ -15,8 +18,7 @@ namespace CinderellaGirlsCardViewer.Views
 
         public GalleryView()
         {
-            InitializeComponent();
-
+            this.InitializeComponent();
             this._vm = new GalleryViewModel();
             this.DataContext = this._vm;
         }
@@ -41,9 +43,10 @@ namespace CinderellaGirlsCardViewer.Views
 
         private void IdolList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this.IdolList.SelectedItem != null)
+            if (this.IdolsList.SelectedItem != null)
             {
-                this.IdolsColumn.Width = new GridLength(200);
+                var width = this.IdolsList.GetOneRowWidth();
+                this.IdolsColumn.Width = new GridLength(width);
                 this.CardsColumn.Width = Star;
             }
             else
@@ -59,7 +62,7 @@ namespace CinderellaGirlsCardViewer.Views
             {
                 this.CardsList.SetValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
 
-                this.CardsRow.Height = new GridLength(170);
+                this.CardsRow.Height = GridLength.Auto;
                 this.CardViewRow.Height = Star;
             }
             else

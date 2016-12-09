@@ -85,7 +85,9 @@
     <Compile Include="Converters\InvertBooleanConverter.cs" />
     <Compile Include="EnumEx.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="Models\CharacterPageLoader.cs" />
+    <Compile Include="Models\CardSignType.cs" />
+    <Compile Include="Models\CharacterClient.cs" />
+    <Compile Include="Models\ICharacterPageLoader.cs" />
     <Compile Include="SimpleCache.cs" />
     <Compile Include="SimpleTaskManager.cs" />
     <Compile Include="ViewModels\GalleryViewModel.cs" />
@@ -103,7 +105,7 @@
     <Compile Include="Models\CardImageType.cs" />
     <Compile Include="Models\CardInfo.cs" />
     <Compile Include="Models\Character.cs" />
-    <Compile Include="Models\CharacterClient.cs" />
+    <Compile Include="Models\MobageClient.cs" />
     <Compile Include="Models\GalleryHelper.cs" />
     <Compile Include="Models\CharacterType.cs" />
     <Compile Include="Models\Rarity.cs" />

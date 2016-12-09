@@ -2,70 +2,102 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <FontFamily x:Key="DefaultFontFamilyKey">Yu Gothic</FontFamily>
+
+    <Brush x:Key="BorderBrushKey">LightGray</Brush>
+
     <sys:Double x:Key="NameFontSizeKey">12</sys:Double>
     <sys:Double x:Key="CoverNameFontSizeKey">16</sys:Double>
     <sys:Double x:Key="HeaderFontSizeKey">20</sys:Double>
 
     <Style x:Key="_TextStyleKey"
-               TargetType="TextBlock">
+           TargetType="TextBlock">
         <Setter Property="FontFamily"
-                    Value="{StaticResource DefaultFontFamilyKey}" />
+                Value="{StaticResource DefaultFontFamilyKey}" />
     </Style>
 
     <Style x:Key="_NameTextStyleKey"
-               TargetType="TextBlock"
-               BasedOn="{StaticResource _TextStyleKey}">
+           TargetType="TextBlock"
+           BasedOn="{StaticResource _TextStyleKey}">
         <Setter Property="TextAlignment"
-                    Value="Center" />
+                Value="Center" />
         <Setter Property="Margin"
-                    Value="2" />
+                Value="2" />
     </Style>
 
     <Style x:Key="NameTextStyleKey"
-               TargetType="TextBlock"
-               BasedOn="{StaticResource _NameTextStyleKey}">
+           TargetType="TextBlock"
+           BasedOn="{StaticResource _NameTextStyleKey}">
         <Setter Property="Foreground"
-                    Value="Black" />
+                Value="Black" />
         <Setter Property="FontSize"
-                    Value="{StaticResource NameFontSizeKey}" />
+                Value="{StaticResource NameFontSizeKey}" />
     </Style>
 
     <Style x:Key="CoverNameTextStyleKey"
-               TargetType="TextBlock"
-               BasedOn="{StaticResource _NameTextStyleKey}">
+           TargetType="TextBlock"
+           BasedOn="{StaticResource _NameTextStyleKey}">
         <Setter Property="FontSize"
-                    Value="{StaticResource CoverNameFontSizeKey}" />
+                Value="{StaticResource CoverNameFontSizeKey}" />
         <Setter Property="Foreground"
-                    Value="White" />
+                Value="White" />
     </Style>
 
     <Style x:Key="HeaderTextStyleKey"
-               TargetType="TextBlock"
-               BasedOn="{StaticResource _TextStyleKey}">
+           TargetType="TextBlock"
+           BasedOn="{StaticResource _TextStyleKey}">
         <Setter Property="FontSize"
-                    Value="{StaticResource HeaderFontSizeKey}" />
+                Value="{StaticResource HeaderFontSizeKey}" />
         <Setter Property="Margin"
-                    Value="4,0" />
+                Value="4,0" />
+    </Style>
+
+    <Style x:Key="VerticalSplitterBorderStyleKey"
+           TargetType="Border">
+        <Setter Property="BorderThickness"
+                Value="1,0,0,0" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource BorderBrushKey}" />
     </Style>
 
     <Style x:Key="SplitterBorderStyleKey"
-               TargetType="Border">
+           TargetType="Border">
         <Setter Property="BorderThickness"
-                    Value="1,0,0,0" />
+                Value="0,1,0,0" />
         <Setter Property="BorderBrush"
-                    Value="LightGray" />
+                Value="{DynamicResource BorderBrushKey}" />
     </Style>
 
+    <ControlTemplate x:Key="ListBoxControlTemplateKey"
+                     TargetType="ListBox">
+        <Border Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="{TemplateBinding Control.BorderThickness}" Name="Bd" Padding="0" SnapsToDevicePixels="True">
+            <ScrollViewer Focusable="False" Padding="{TemplateBinding Control.Padding}">
+                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+            </ScrollViewer>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="UIElement.IsEnabled" Value="False">
+                <Setter Property="Border.Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+            </Trigger>
+            <Trigger Property="ItemsControl.IsGrouping" Value="True">
+                <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <Style x:Key="ListBoxKey"
-               TargetType="ListBox">
+           TargetType="ListBox">
+        <Setter Property="Template"
+                Value="{DynamicResource ListBoxControlTemplateKey}" />
         <Setter Property="ScrollViewer.CanContentScroll"
-                    Value="False" />
+                Value="False" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
-                    Value="Disabled" />
+                Value="Disabled" />
         <Setter Property="Grid.IsSharedSizeScope"
-                    Value="True" />
+                Value="True" />
         <Setter Property="BorderThickness"
-                    Value="0" />
+                Value="1" />
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource BorderBrushKey}" />
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
@@ -105,20 +137,20 @@
     </Style>
 
     <Style x:Key="StrechSizeImageStyleKey"
-               TargetType="Image">
+           TargetType="Image">
         <Setter Property="Stretch"
-                    Value="Uniform" />
+                Value="Uniform" />
         <Setter Property="RenderOptions.BitmapScalingMode"
-                    Value="HighQuality" />
+                Value="HighQuality" />
     </Style>
     <Style x:Key="OriginalSizeImageStyleKey"
-               TargetType="Image">
+           TargetType="Image">
         <Setter Property="Stretch"
-                    Value="None" />
+                Value="None" />
         <Setter Property="RenderOptions.BitmapScalingMode"
-                    Value="HighQuality" />
+                Value="HighQuality" />
     </Style>
-    
+
     <Style TargetType="TextBox">
         <Setter Property="VerticalContentAlignment"
                 Value="Center" />

@@ -23,8 +23,6 @@ namespace CinderellaGirlsCardViewer.Views
             this._browser = new WebBrowser();
             this._browser.Navigating += BrowserOnNavigating;
             this._browser.Navigate("http://sp.mbga.jp/_lg?_from=globalHeaderNaviGuest");
-
-            this.Content.Content = this._browser;
         }
 
         private void BrowserOnNavigating(object sender, NavigatingCancelEventArgs e)
@@ -32,8 +30,14 @@ namespace CinderellaGirlsCardViewer.Views
             var url = e.Uri.ToString();
 
             Debug.WriteLine("Navegating to " + url);
-
-            if (url == "http://sp.mbga.jp/")
+            if (url.StartsWith("https://connect.mobage.jp/login"))
+            {
+                if (!this.Content.HasContent)
+                {
+                    this.Content.Content = this._browser;
+                }
+            }
+            else if (url == "http://sp.mbga.jp/")
             {
                 e.Cancel = true;
                 this._browser.Navigating -= this.BrowserOnNavigating;

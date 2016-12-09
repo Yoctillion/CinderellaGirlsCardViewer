@@ -157,29 +157,27 @@
                                   Width="*" />
                 <ColumnDefinition x:Name="CardsColumn"
                                   Width="0" />
-                <ColumnDefinition x:Name="CardViewColumn"
-                                  Width="0" />
             </Grid.ColumnDefinitions>
 
-            <ListBox x:Name="IdolList"
+            <ListBox x:Name="IdolsList"
                      ItemsSource="{Binding Characters, Mode=OneWay}"
                      SelectedItem="{Binding SelectedCharacter, Mode=TwoWay}"
                      ItemTemplate="{StaticResource CharacterCoverTemplate}"
                      Style="{StaticResource ListBoxKey}"
                      SelectionChanged="IdolList_OnSelectionChanged" />
 
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition x:Name="CardsRow"
-                                   Height="*" />
-                    <RowDefinition x:Name="CardViewRow"
-                                   Height="0" />
-                </Grid.RowDefinitions>
+            <Border Grid.Column="1"
+                    BorderThickness="0,1,1,1"
+                    BorderBrush="{DynamicResource BorderBrushKey}">
 
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition x:Name="HeaderRow"
+                                       Height="Auto" />
+                        <RowDefinition x:Name="CardsRow"
+                                       Height="*" />
+                        <RowDefinition x:Name="CardViewRow"
+                                       Height="0" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0"
@@ -192,33 +190,32 @@
                              SelectedItem="{Binding SelectedCard, Mode=TwoWay}"
                              ItemTemplate="{StaticResource CardAvatarTemplate}"
                              Style="{StaticResource ListBoxKey}"
-                             SelectionChanged="CardsList_OnSelectionChanged" />
+                             SelectionChanged="CardsList_OnSelectionChanged"
+                             BorderThickness="0,0,0,1" />
+
+                    <Border Grid.Row="2">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Style="{StaticResource HeaderTextStyleKey}">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}・{1}">
+                                        <Binding Path="SelectedCard.Info.RarityString" Mode="OneWay" />
+                                        <Binding Path="SelectedCard.Info.CardName" Mode="OneWay" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+
+                            <ContentControl Grid.Row="1"
+                                            Content="{Binding SelectedCard}"
+                                            ContentTemplate="{StaticResource CardViewTemplate}" />
+                        </Grid>
+                    </Border>
                 </Grid>
-
-                <Grid Grid.Row="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0"
-                               Style="{StaticResource HeaderTextStyleKey}">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}・{1}">
-                                <Binding Path="SelectedCard.Info.RarityString" Mode="OneWay" />
-                                <Binding Path="SelectedCard.Info.CardName" Mode="OneWay" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-
-                    <ContentControl Grid.Row="1"
-                                    Content="{Binding SelectedCard}"
-                                    ContentTemplate="{StaticResource CardViewTemplate}" />
-                </Grid>
-            </Grid>
-
-            <Border Grid.Column="2"
-                    Style="{StaticResource SplitterBorderStyleKey}">
             </Border>
         </Grid>
     </Grid>

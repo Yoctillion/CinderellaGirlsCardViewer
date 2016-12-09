@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -7,6 +8,9 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Win32;
 
 namespace CinderellaGirlsCardViewer
@@ -78,6 +82,54 @@ namespace CinderellaGirlsCardViewer
             return response.Headers.TryGetValues("last-modified", out lastModified)
                 ? DateTime.ParseExact(lastModified.First(), format, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
                 : DateTime.Now;
+        }
+
+        public static double GetOneRowHeight(this ListBox listBox)
+        {
+            var contentHeight = GetAllListBoxItems(listBox)
+                .Select(i => i.ActualHeight)
+                .DefaultIfEmpty()
+                .Max();
+
+            var scrollBarHeight = SystemParameters.HorizontalScrollBarHeight;
+
+            var border = listBox.BorderThickness;
+            var borderHeight = border.Top + border.Bottom;
+
+            return contentHeight + scrollBarHeight + borderHeight;
+        }
+
+        public static double GetOneRowWidth(this ListBox listBox)
+        {
+            var contentWidth = GetAllListBoxItems(listBox)
+                .Select(i => i.ActualWidth)
+                .DefaultIfEmpty()
+                .Max();
+
+            var scrollBarWidth = SystemParameters.VerticalScrollBarWidth;
+
+            var border = listBox.BorderThickness;
+            var borderWidth = border.Left + border.Right;
+
+            return contentWidth + scrollBarWidth + borderWidth;
+        }
+
+        private static IEnumerable<ListBoxItem> GetAllListBoxItems(ListBox listBox)
+        {
+            var items = listBox.ItemsSource;
+            foreach (var item in items)
+            {
+                yield return (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
+            }
+        }
+
+        public static async Task AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> elements, TimeSpan interval)
+        {
+            foreach (var e in elements)
+            {
+                collection.Add(e);
+                await Task.Delay(interval);
+            }
         }
     }
 }

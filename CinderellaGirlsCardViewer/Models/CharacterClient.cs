@@ -1,74 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
-using CsQuery;
-using CsQuery.ExtensionMethods.Internal;
 
 namespace CinderellaGirlsCardViewer.Models
 {
-    public class CharacterClient : NotificationObject, IDisposable
+    public class CharacterClient
     {
-        private static readonly string[] Urls =
+        public MobageClient Client { get; set; }
+
+        private List<Character> _allCharacters;
+
+        public async Task Update()
         {
-            "http://mbga.jp",
-            "http://sp.pf.mbga.jp",
-            "http://sp.mbga.jp",
-            "http://www.mbga.jp"
-        };
-
-        private readonly HttpClient _client;
-
-        private readonly HttpClientHandler _handler;
-
-        public CharacterClient()
-        {
-            this._handler = new HttpClientHandler();
-            this._client = new HttpClient(this._handler);
-            this._client.DefaultRequestHeaders.Add(
-                "User-Agent",
-                "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36");
+            this._allCharacters = (await this.Client.SearchAll()).ToList();
         }
 
-        public void LoadCookie()
+        public async Task<IEnumerable<Character>> Search(string keyword)
         {
-            this._handler.CookieContainer = Helper.GetCookieContainerFromUris(Urls);
-        }
-
-
-        public CharacterPageLoader Query(string keyword)
-        {
-            return new CharacterPageLoader(this._client, keyword);
-        }
-
-        public async Task<IEnumerable<Card>> GetCardsOfCharacter(Character character)
-        {
-            var characterPage = await this._client.GetStringAsync(character.CardsEntry);
-
-            CQ dom = characterPage;
-            return dom.GetCards(character.Name);
-        }
-
-        public async Task Download(Uri url, string path)
-        {
-            using (var response = await this._client.GetAsync(url))
+            if (this._allCharacters == null)
             {
-                var content = await response.Content.ReadAsByteArrayAsync();
-                File.WriteAllBytes(path, content);
-
-                var time = response.GetLastModifedTime();
-                File.SetLastWriteTime(path, time);
+                await this.Update();
             }
-        }
 
-        public void Dispose()
-        {
-            this._client.Dispose();
-            this._handler.Dispose();
+            keyword = keyword.Trim();
+            if (string.IsNullOrEmpty(keyword))
+            {
+                return this._allCharacters.AsReadOnly();
+            }
+            var searchResult = await this.Client.Search(keyword);
+
+            return this._allCharacters.Where(character => character.Name.Contains(keyword) || searchResult.Contains(character));
         }
     }
 }

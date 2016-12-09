@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using CsQuery;
@@ -9,41 +10,44 @@ namespace CinderellaGirlsCardViewer.Models
 {
     internal static class GalleryHelper
     {
-        public static IEnumerable<Character> GetCharacters(this CQ page)
+        public static IEnumerable<Character> GetCharacters(this CQ page, ref int count)
         {
             var idols = page[".idol"];
+            var nameSet = new HashSet<string>();
+            count += idols.Length;
             return idols.Map(idol =>
-            {
-                var nameDiv = idol.NextElementSibling.FirstChild;
-                return new Character
                 {
-                    Name = nameDiv.InnerHTML.HtmlDecode(),
-                    Type = nameDiv.ClassName.ToEnum<CharacterType>(),
-                    CoverUrl = new Uri(idol.Style["background"].GetImageUrl()),
-                    CardsEntry = new Uri(idol.ParentNode.ParentNode.GetAttribute("href"))
-                };
-            });
+                    var nameDiv = idol.NextElementSibling.ChildNodes.First(e => string.Equals(e.NodeName, "div", StringComparison.OrdinalIgnoreCase));
+                    return new Character
+                    {
+                        Name = nameDiv.InnerHTML.HtmlDecode(),
+                        Type = nameDiv.ClassName.ToEnum<CharacterType>(),
+                        CoverUrl = new Uri(idol.Style["background"].GetImageUrl()),
+                        CardsEntry = new Uri(idol.ParentNode.ParentNode.GetAttribute("href"))
+                    };
+                })
+                .Where(idol => nameSet.Add(idol.Name));
         }
 
-        public static IEnumerable<Card> GetCards(this CQ page, string idolName)
+        public static IEnumerable<Card> GetCards(this string page, string idolName)
         {
-            var idols = page[".idol"];
-            return idols.Map(idol =>
+            var json = Regex.Match(page, @"idol\.detail_list = (.*);").Groups[1].Value;
+            var cards = JToken.Parse(json);
+            foreach (var card in cards)
             {
-                var dom = CQ.Create(idol);
-                var profile = JToken.Parse(dom.Find("input[name=profile]").Attr("data-profile"));
-                var baseData = dom.Find("input[name=basedata]");
-
-                return new Card(new CardInfo
+                var data = card["data"];
+                var profile = card["profile"];
+                yield return new Card(new CardInfo
                 {
+                    Id = profile["card_id"].Value<string>(),
                     IdolName = idolName,
-                    Kana = profile["kana"].Value<string>().UrlDecode(),
-                    CardName = baseData.Attr("data-name").UrlDecode(),
-                    Rarity = baseData.Attr("data-rarity").ToEnum<Rarity>(),
-                    Type = baseData.Attr("data-attribute").ToEnum<CharacterType>(),
-                    CardId = dom.Find("div").Css("background").GetCardId()
+                    Kana = profile["card_kana"].Value<string>(),
+                    CardName = data["card_name"].Value<string>(),
+                    Rarity = (Rarity)((data["rarity"].Value<int>() + 1) / 2),
+                    Type = data["attribute"].Value<string>().ToEnum<CharacterType>(),
+                    HashCardId = data["hash_card_id"].Value<string>()
                 });
-            });
+            }
         }
 
         public static string GetNextPageUrl(this CQ page)

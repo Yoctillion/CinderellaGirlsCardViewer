@@ -4,6 +4,8 @@
     {
         internal CardInfo() { }
 
+        internal string Id { get; set; }
+
         public string IdolName { get; internal set; }
 
         public string Kana { get; internal set; }
@@ -16,6 +18,6 @@
 
         public CharacterType Type { get; internal set; }
 
-        internal string CardId { get; set; }
+        internal string HashCardId { get; set; }
     }
 }

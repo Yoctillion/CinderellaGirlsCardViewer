@@ -72,7 +72,8 @@ namespace CinderellaGirlsCardViewer
                 this._lastCancelToken = new CancellationTokenSource();
                 var token = this._lastCancelToken.Token;
 
-                Task.Run(() => action(token), token);
+                Task.Run(() => { }).ContinueWith(t => action(token), TaskScheduler.FromCurrentSynchronizationContext());
+                //Task.Run(() => action(token), token);
             }
         }
 

@@ -10,7 +10,8 @@ namespace CinderellaGirlsCardViewer.ViewModels
 {
     public class GalleryViewModel : NotificationObject
     {
-        private readonly CharacterClient _client;
+        private readonly MobageClient _client;
+        private readonly CharacterClient _characterClient;
 
         #region Characters
 
@@ -38,24 +39,7 @@ namespace CinderellaGirlsCardViewer.ViewModels
 
         #endregion
 
-        #region Cards
-
-        private Card[] _cards;
-
-        public Card[] Cards
-        {
-            get { return this._cards; }
-            private set
-            {
-                if (this._cards != value)
-                {
-                    this._cards = value;
-                    this.OnPropertyChanged();
-                }
-            }
-        }
-
-        #endregion
+        public ObservableCollection<Card> Cards { get; } = new ObservableCollection<Card>();
 
         #region SelectedCard
 
@@ -99,8 +83,10 @@ namespace CinderellaGirlsCardViewer.ViewModels
 
         public GalleryViewModel()
         {
-            this._client = new CharacterClient();
+            this._client = new MobageClient();
             this._client.LoadCookie();
+            this._characterClient = new CharacterClient { Client = this._client };
+            //this._characterClient.Update();
             this._cardsCache = new SimpleCache<Character, Card[]>();
         }
 
@@ -112,35 +98,32 @@ namespace CinderellaGirlsCardViewer.ViewModels
             this.Characters.Clear();
             this._cardsCache.Clear();
 
-            var pages = this._client.Query(queryString);
-            while (await pages.LoadNextPage())
-            {
-                this.Characters.AddRange(pages.Characters);
-            }
-
-            if (Characters.Count == 1)
-            {
-                this.SelectedCharacter = this.Characters[0];
-            }
+            await this.Characters.AddRange(await this._characterClient.Search(queryString), TimeSpan.FromSeconds(0.01));
 
             this.IsQuerying = false;
         }
 
-        private readonly SimpleTaskManager _getCardsTaskManager = new SimpleTaskManager();
+        //private readonly SimpleTaskManager _getCardsTaskManager = new SimpleTaskManager();
+
+        private Task<Card[]> _currentTask;
 
         public void GetCards(Character character)
         {
-            this._getCardsTaskManager.Do(new SpecialTask<Card[]>
+            this.Cards.Clear();
+
+            if (character != null)
             {
-                BeforeCancelling = () =>
+                var task = this._cardsCache.GetAsync(character, async c => (await this._client.GetCardsOfCharacter(c)).ToArray());
+                this._currentTask = task;
+
+                this._currentTask.ContinueWith(async t =>
                 {
-                    this.Cards = null;
-                    return character != null
-                        ? this._cardsCache.Get(character, c => this._client.GetCardsOfCharacter(c).Result.ToArray())
-                        : null;
-                },
-                IfNotCancelled = cards => this.Cards = cards
-            });
+                    if (this._currentTask == task)
+                    {
+                        await this.Cards.AddRange(t.Result, TimeSpan.FromSeconds(0.01));
+                    }
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+            }
         }
 
         public async Task SaveImage(Uri url, string path)
